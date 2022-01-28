@@ -1,4 +1,4 @@
-const { PagedHTML, components, utils } = require('../dist/pagedHTML.development');
+const { PagedHTML, components, utils } = require('paged-html');
 const styles = require('../paged.css');
 
 const { Section, Paragraph, TOC } = components;
