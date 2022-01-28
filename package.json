@@ -1,6 +1,6 @@
 {
     "name": "paged-html",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A library to render paged HTML which is print ready to any paper format",
     "main": "index.js",
     "scripts": {
