@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+.history
+.vscode
+package-lock.json
+demo/public/bundle.js
