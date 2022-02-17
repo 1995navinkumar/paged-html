@@ -1,14 +1,14 @@
-import { setPageOptions, assignDefaultEvents, noOp, TEMPLATE } from './utils.js';
+import { setPageOptions, assignDefaultEvents, noOp, TEMPLATE, getDefaultDestinationNode } from './utils.js';
 
 export function PagedHTML(data) {
-    var { rootNode, templates, events = {}, pageConfig = {} } = data;
+    var { destinationNode = getDefaultDestinationNode(), templates, events = {}, pageConfig = {} } = data;
     var pages = [];
     var sections = [];
     var depth = 0;
 
     var pagesDiv = document.createElement("div");
     pagesDiv.classList.add("pages");
-    rootNode.appendChild(pagesDiv);
+    destinationNode.appendChild(pagesDiv);
 
     var instance = {
         pages,
@@ -20,8 +20,7 @@ export function PagedHTML(data) {
         getRemainingHeight,
         createSection,
         TemplateRenderer,
-        rootNode,
-        pageEvents,
+        destinationNode,
         pagesDiv,
         templates,
         events: assignDefaultEvents(events)
@@ -96,26 +95,6 @@ export function PagedHTML(data) {
 
     }
 
-    function pageEvents(...eventNames) {
-        if (eventNames.length == 0) {
-            eventNames = ["onPageStart", "onPageEnd"];
-        }
-        function on() {
-            eventNames.forEach(e => {
-                instance.events[e] = events[e] || noOp;
-            })
-        }
-        function off() {
-            eventNames.forEach(e => {
-                instance.events[e] = noOp;
-            })
-        }
-        return {
-            on,
-            off
-        }
-    }
-
     function createSection(name, userProps = {}) {
         var page = instance.getCurrentPage();
         var Section = {
@@ -132,7 +111,7 @@ export function PagedHTML(data) {
         return Section;
     }
 
-    setPageOptions(rootNode, pageConfig);
+    setPageOptions(destinationNode, pageConfig);
 
     insertNewPage();
 

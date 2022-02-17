@@ -1,11 +1,11 @@
-const { PagedHTML, components, utils } = require('paged-html');
+const { PagedHTML, components, utils } = require('../index.js');
 const styles = require('../paged.css');
 
 const { Section, Paragraph, TOC } = components;
 const { htmlToElement } = utils;
 
 document.addEventListener("DOMContentLoaded", () => {
-    var rootNode = document.querySelector("#root");
+    var destinationNode = document.querySelector("#root");
 
     var templates = [{
         component: Section,
@@ -16,20 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
             component: Paragraph,
             paraElement: getParaElement()
         }]
+    }, {
+        component: TOC
     }]
 
-    var pdfInstance = PagedHTML({
-        rootNode,
+    PagedHTML({
+        destinationNode,
         templates
-    })
-
-    var toc = PagedHTML({
-        rootNode,
-        templates: [{
-            component: TOC,
-            sections: pdfInstance.sections,
-            parentNode: pdfInstance.rootNode
-        }]
     })
 })
 

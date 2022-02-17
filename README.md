@@ -63,6 +63,8 @@ Yes, you can! Using PagedHTML.
 ```js
 import {PagedHTML} from 'paged-html';
 import styles from 'paged-html/paged.css';
+
+
 ```
 
 
@@ -85,7 +87,7 @@ Each PagedHTML Component has the below hooks
                 Will be called until all the elements are rendered to the page.
              */
         }
-        function onOverflow(){
+        function onOverflow(overflowedElement){
             /**
                Hook invoked whenever the yielded element overflows
                Logic must be added (DOM mutation) to handle overflows 
@@ -113,6 +115,7 @@ Each component will receive pagedInstance upon rendering
 * getCurrentPage
 * getRemainingHeight
 * createSection
+* TemplateRenderer
 
 
 #### Events
@@ -124,5 +127,25 @@ Each component will receive pagedInstance upon rendering
 
 * pages
 * sections
+* destinationNode
+* pagesDiv
+* templates
+* events
 
 
+### Template Structure 
+
+`templates` is an array of PagedHTML components which will be rendered sequentially. If a PagedHTML component needs to render its own templates (chapter and sections), it can be provided as nested property
+
+```js
+
+templates = [{
+  component : Section,
+  name: "Chapter1",
+  displayName: "Chapter 1",
+  // templates that needs to be rendered inside this section can be provided as follows
+},{
+
+}]
+
+```

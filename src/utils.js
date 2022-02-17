@@ -1,3 +1,8 @@
+export function getDefaultDestinationNode() {
+    var destination = document.createElement("div");
+    document.body.appendChild(destination);
+    return destination;
+}
 
 export function nodeBottom(node) {
     var isTextNode = node.nodeType == 3;

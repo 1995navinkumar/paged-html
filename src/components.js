@@ -180,17 +180,20 @@ export function Table(instance, data) {
 }
 
 
-export function TOC(instance, userData) {
+export function TOC(instance, { sections = instance.sections }) {
 
     var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
+
+    var tocPages = [];
 
     function init() {
         // assign null objects to pageEnd and pageStart events
         !instance.getCurrentPage().isNew() && instance.insertNewPage();
         instance.getCurrentPage().contentArea.appendChild(tocElement);
+        tocPages.push(instance.getCurrentPage());
     }
 
-    function* renderer(sections = userData.sections) {
+    function* renderer() {
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
             var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">
@@ -211,10 +214,11 @@ export function TOC(instance, userData) {
         tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
         instance.getCurrentPage().contentArea.appendChild(tocElement);
         tocElement.appendChild(overFlowEl);
+        tocPages.push(instance.getCurrentPage());
     }
 
     function onEnd() {
-        instance.rootNode.prepend(instance.pagesDiv);
+        instance.pagesDiv.prepend(...tocPages);
     }
 
     return {
