@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Paged HTML</title>
     <style>
         .section {
             font-size: 24px;
@@ -43,15 +43,34 @@
             font-weight: bold;
             padding: 8px 0px;
         }
+
+
+        html,
+        body,
+        #root {
+            /* height: 100%; */
+            width: 100%;
+        }
+
+        .App {
+            font-family: sans-serif;
+            text-align: center;
+            width: 1200px;
+            height: 100%;
+            margin: auto;
+            overflow: scroll;
+        }
+
     </style>
 </head>
 
 <body>
-    <script src="./bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 
     <div id="root">
-
     </div>
+    <script type="module" src="./index.js"></script>
 
 </body>
 
