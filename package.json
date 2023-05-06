@@ -14,6 +14,7 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "cross-env": "^7.0.3",
         "esbuild": "0.17.18"
     }
 }
