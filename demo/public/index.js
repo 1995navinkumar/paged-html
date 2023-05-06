@@ -4,6 +4,7 @@ import './components.js';
 import { HeroQueries } from './hero-queries.js';
 import { HeroChart } from './chart-data.js';
 import { heaviestHeroes, top10HeroesByPower, top10TallestHeroes } from './table-data.js';
+import PagedHTML from '../../src/index.js';
 
 Chart.register(ChartDataLabels);
 
@@ -20,7 +21,7 @@ function App(heroes) {
     let topHeaviestHeroes = heaviestHeroes(queries);
 
     return html`
-        <img src='Marvel_Logo.svg' style='height : 44px'/>
+        <img src='public/Marvel_Logo.svg' style='height : 44px'/>
         <div style="display:flex; flex-wrap: wrap; grid-gap:44px">
             <sn-chart .chartdata=${chartData.genderPieChart()}></sn-chart>
             <sn-chart .width=${800} .chartdata=${chartData.raceBarChart()}></sn-chart>
@@ -62,3 +63,9 @@ document.addEventListener("DOMContentLoaded", () => {
         })
 }
 );
+
+if (process.env.NODE_ENV === 'development') {
+    new EventSource('/esbuild').addEventListener('change', () => location.reload())
+}
+
+
