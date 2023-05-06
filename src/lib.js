@@ -1,40 +1,60 @@
-import { setPageOptions, assignDefaultEvents, noOp, TEMPLATE, getDefaultDestinationNode } from './utils.js';
+// @ts-check
+import { setPageOptions, assignDefaultEvents, TEMPLATE } from './utils.js';
 
-export function PagedHTML(data) {
-    var { destinationNode = getDefaultDestinationNode(), templates, events = {}, pageConfig = {} } = data;
-    var pages = [];
-    var sections = [];
-    var depth = 0;
+/**
+ * @typedef { import("./types").PagedHTMLInstance } PagedHTMLInstance
+ * @typedef { import("./types").Config } Config
+ * @typedef { import("./types").PAGE_SIZE } PAGE_SIZE
+ * @typedef { import("./types").Margin } Margin
+ * @typedef { import("./types").PageConfig } PageConfig
+ * @typedef { import("./types").PagedEvents } PagedEvents
+ * @typedef { import("./types").Section } Section
+ * @typedef { import("./types").PagedHTMLElement } PagedHTMLElement
+ * @typedef { import("./types").TemplateConfig } TemplateConfig
+ * @typedef { import("./types").PagedComponent } PagedComponent
+*/
 
-    var pagesDiv = document.createElement("div");
+/**
+ * @param {Config} config
+ */
+function create(config) {
+    const { root, events = assignDefaultEvents(config.events), pageConfig } = config;
+    const pages = [];
+    const sections = [];
+    const depth = 0;
+
+    const pagesDiv = document.createElement("div");
     pagesDiv.classList.add("pages");
-    destinationNode.appendChild(pagesDiv);
+    root.appendChild(pagesDiv);
 
-    var instance = {
+    /**
+     * @type {PagedHTMLInstance}
+     */
+    const instance = {
         pages,
-        sections,
         depth,
+        sections,
         createNewPage,
         insertNewPage,
         getCurrentPage,
         getRemainingHeight,
         createSection,
-        TemplateRenderer,
-        destinationNode,
-        pagesDiv,
-        templates,
         events: assignDefaultEvents(events)
     }
 
+    /**
+     * @returns {PagedHTMLElement}
+     */
     function createNewPage() {
         var pageTemplate = document.createElement("template");
         pageTemplate.innerHTML = TEMPLATE;
-        return document.importNode(pageTemplate.content, true);
+        //@ts-ignore
+        return pageTemplate.content.firstElementChild;
     }
 
     function triggerPageEndEvent() {
         if (pages[pages.length - 1]) {
-            instance.events.onPageEnd(pages[pages.length - 1], instance);
+            events.onPageEnd(pages[pages.length - 1], instance);
         }
     }
 
@@ -43,16 +63,18 @@ export function PagedHTML(data) {
 
         var newPage = createNewPage();
         pagesDiv.appendChild(newPage);
-        var pageEl = pagesDiv.lastElementChild;
-        pageEl.contentArea = pageEl.querySelector(".content");
-        pages.push(pageEl);
-        pageEl.pageNumber = pages.length;
-        pageEl.isNew = () => {
-            return pageEl.contentArea.childNodes.length == 0
+        pages.push(newPage);
+        const contentArea = newPage.querySelector(".content");
+        const pageNumber = pages.length;
+        const isNew = () => {
+            //@ts-ignore
+            return contentArea.childNodes.length == 0
         }
 
-        instance.events.onPageStart(pageEl, instance);
-        return pageEl;
+        Object.assign(newPage, { contentArea, pageNumber, isNew });
+
+        events.onPageStart(newPage, instance);
+        return newPage;
     }
 
     function getCurrentPage() {
@@ -72,31 +94,8 @@ export function PagedHTML(data) {
         return contentArea.clientHeight - contentHeight;
     }
 
-
-    function TemplateRenderer(templ, userProps = {}) {
-        templ.forEach(template => {
-            var { component, ...rest } = template;
-
-            var { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
-
-            init();
-
-            for (const el of renderer()) {
-                var currentPage = getCurrentPage();
-                var contentArea = currentPage.contentArea;
-                if (contentArea.scrollHeight > contentArea.clientHeight) {
-                    onOverflow(el);
-                }
-            }
-
-            onEnd();
-
-        });
-
-    }
-
     function createSection(name, userProps = {}) {
-        var page = instance.getCurrentPage();
+        var page = getCurrentPage();
         var Section = {
             name,
             ...userProps,
@@ -111,14 +110,45 @@ export function PagedHTML(data) {
         return Section;
     }
 
-    setPageOptions(destinationNode, pageConfig);
-
+    setPageOptions(root, pageConfig);
     insertNewPage();
-
-    TemplateRenderer(templates);
-
-    triggerPageEndEvent();
 
     return instance;
 
 }
+
+/**
+ * 
+ * @param { PagedHTMLInstance } instance 
+ * @param { Array<TemplateConfig> } templates 
+ * @param { object } userProps 
+ */
+function render(instance, templates, userProps = {}) {
+    templates.forEach(template => {
+        const { component, ...rest } = template;
+
+        const { getCurrentPage } = instance;
+
+        const { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
+
+        init();
+
+        for (const el of renderer()) {
+            var currentPage = getCurrentPage();
+            var contentArea = currentPage.contentArea;
+            if (contentArea.scrollHeight > contentArea.clientHeight) {
+                onOverflow(el);
+            }
+        }
+
+        onEnd();
+
+    });
+}
+
+const PagedHTML = {
+    create,
+    render
+}
+
+export default PagedHTML;

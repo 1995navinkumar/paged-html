@@ -16,6 +16,8 @@ export const powerLens = hero => hero.powerstats;
 export const totalPower = p => p.intelligence + p.strength + p.speed + p.durability + p.power + p.combat;
 export const avgPower = p => totalPower(p) / 6;
 
+export const imageLens = (hero,html) => html`<img src=${hero.images.md} />`;
+
 export const nameLens = hero => hero.name;
 export const heightLens = hero => hero.appearance.height[1]; // we omit inches and consider only cm/meters
 export const heightInCm = h => {

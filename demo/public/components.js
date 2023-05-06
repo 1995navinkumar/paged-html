@@ -35,13 +35,19 @@ class RenderTable extends LitElement {
         }
 
         th {
-            min-width : 150px;
             padding-top: 12px;
             padding-bottom: 12px;
             text-align: left;
             background-color: #04aa6d;
             color: white;
         }
+
+        td img {
+            width : 56px;
+            height : 56px;
+            border-radius : 8px;
+        }
+
     `
     render() {
         return html`
@@ -58,7 +64,7 @@ class RenderTable extends LitElement {
                         ${
                             this.rows.map(row => html`
                                     <tr>
-                                        ${this.columns.map(col => html`<td>${col.accessor(row)}</td>`)}
+                                        ${this.columns.map(col => html`<td>${col.accessor(row, html)}</td>`)}
                                     </tr>
                                 `)
                         }

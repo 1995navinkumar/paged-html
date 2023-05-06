@@ -20,6 +20,7 @@ function App(heroes) {
     let topHeaviestHeroes = heaviestHeroes(queries);
 
     return html`
+        <img src='Marvel_Logo.svg' style='height : 44px'/>
         <div style="display:flex; flex-wrap: wrap; grid-gap:44px">
             <sn-chart .chartdata=${chartData.genderPieChart()}></sn-chart>
             <sn-chart .width=${800} .chartdata=${chartData.raceBarChart()}></sn-chart>
@@ -40,6 +41,14 @@ function App(heroes) {
                 .rows=${topHeaviestHeroes.rows}
             >
             </sn-table>
+        </div>
+
+        <div>
+            <img src='https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/images/md/644-superman.jpg'/>
+            <div>
+                <span>Name</span>
+                <span>Superman</span>
+            <div>
         </div>
     `
 }

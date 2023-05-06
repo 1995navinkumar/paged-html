@@ -37,7 +37,7 @@ var defaultMargin = {
     bottom: "1in"
 }
 
-export function setPageOptions(el, options) {
+export function setPageOptions(el, options = {}) {
     var { format, width = "8.5in", height = "11in", margin = defaultMargin, landscape = false } = options;
     var { left = 0, right = 0, top = 0, bottom = 0 } = margin;
 
@@ -64,6 +64,7 @@ export function setPageOptions(el, options) {
 				size :  ${width} ${height};
 				margin : 0;
 			}
+            ${pageStyles}
 		</style>`);
 
     el.appendChild(styleEl);
@@ -105,7 +106,7 @@ export function htmlToElement(html) {
     var template = document.createElement('template');
     html = normalizeHTML(html);
     template.innerHTML = html;
-    return template.content.firstChild;
+    return template.content.firstElementChild;
 }
 
 export function normalizeHTML(str) {
@@ -127,3 +128,69 @@ export const TEMPLATE = `
 	<div class="bottom-right"></div>
 	<div class="content"></div>
 </div>`;
+
+
+export const pageStyles = `
+.pages {
+    margin: auto;
+    width: var(--page-width);
+}
+
+@media screen {
+    .page {
+        border: 1px solid #cecece;
+        margin: 2em auto;
+    }
+}
+
+.page {
+    display: grid;
+    grid-template-columns: [left] var(--margin-left) [center] calc(var(--page-width) - var(--margin-left) - var(--margin-right)) [right] var(--margin-right);
+    grid-template-rows: [top] var(--margin-top) [center] calc(var(--page-height) - var(--margin-top) - var(--margin-bottom)) [bottom] var(--margin-bottom);
+}
+
+.top-left {
+    grid-column: left;
+    grid-row: top;
+}
+
+.top-center {
+    grid-column: center;
+    grid-row: top;
+}
+
+.top-right {
+    grid-column: right;
+    grid-row: top;
+}
+
+.left {
+    grid-column: left;
+    grid-row: center;
+}
+
+.right {
+    grid-column: right;
+    grid-row: center;
+}
+
+.bottom-right {
+    grid-column: right;
+    grid-row: bottom;
+}
+
+.bottom-left {
+    grid-column: left;
+    grid-row: bottom;
+}
+
+.bottom-center {
+    grid-column: center;
+    grid-row: bottom;
+}
+
+.content {
+    grid-column: center;
+    grid-row: center;
+}
+`

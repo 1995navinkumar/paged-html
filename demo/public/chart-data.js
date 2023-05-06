@@ -58,7 +58,9 @@ export function HeroChart(queries) {
         let datasets = [{
             label: "Heroes by Gender",
             data: Object.values(heroesByGender),
-            backgroundColor: [CHART_COLORS.red, CHART_COLORS.blue, CHART_COLORS.green]
+            backgroundColor: [CHART_COLORS.red, CHART_COLORS.blue, CHART_COLORS.green],
+            radius : '75%',
+            cutout : '55%'
         }]
 
         let data = { labels, datasets };

@@ -1,8 +1,8 @@
-import { heightLens, nameLens, totalPower, powerLens, weightLens } from "./hero-queries.js";
+import { heightLens, nameLens, totalPower, powerLens, weightLens, imageLens } from "./hero-queries.js";
 
 export function top10HeroesByPower(queries) {
     let top10Heroes = queries.getTop10HeroesByPower();
-    let columns = [{ label: "Name", accessor: nameLens }, { label: "Power", accessor: h => totalPower(powerLens(h)) }];
+    let columns = [{ label: '', accessor: imageLens }, { label: "Name", accessor: nameLens }, { label: "Power", accessor: h => totalPower(powerLens(h)) }];
     return {
         columns,
         rows: top10Heroes
