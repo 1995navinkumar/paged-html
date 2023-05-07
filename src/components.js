@@ -79,7 +79,7 @@ export function Section(instance, { templates, name, displayName, parentSection,
         }
 
         var section = createAnchor();
-        instance.TemplateRenderer(templates, { parentSection: section });
+        instance.render(templates, { parentSection: section });
     }
 
     function createAnchor() {

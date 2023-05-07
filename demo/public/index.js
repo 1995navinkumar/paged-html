@@ -1,11 +1,9 @@
 // @ts-check
-import { html, render } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/all/lit-all.min.js';
-import './components.js';
 import { HeroQueries } from './hero-queries.js';
 import { HeroChart } from './chart-data.js';
 import { heaviestHeroes, top10HeroesByPower, top10TallestHeroes } from './table-data.js';
 import PagedHTML, { utils } from '../../src/index.js';
-import { Table } from '../../src/components.js';
+import { Section, Table, TOC } from '../../src/components.js';
 
 Chart.register(ChartDataLabels);
 
@@ -66,31 +64,82 @@ function PDF(heroes) {
         events: {
             onPageEnd: (page, instance) => {
                 const topLeft = page.querySelector('.top-left');
-                topLeft.innerHTML = `<img src='public/Marvel_Logo.svg' style='height : 44px'/>`;
+                const style = `
+                    width: 100%;
+                    position: relative;
+                    top: 16px;
+                    left: 16px;
+                `
+                topLeft.innerHTML = `<img src='public/Marvel_Logo.svg' style='${style}'/>`;
             },
             onPageStart: () => { }
         },
     });
 
+    const heroesByGender = {
+        component: Section,
+        name: 'heroesByGender',
+        displayName: 'Heroes By  Gender',
+        templates: [{
+            component: PDFChart,
+            chartData: chartData.genderPieChart()
+        }]
+    }
 
-    instance.render([{
-        component: PDFChart,
-        chartData: chartData.genderPieChart()
-    }, {
-        component: PDFChart,
-        chartData: chartData.raceBarChart(),
-        width: 600,
-        height: 200
-    }, {
-        component: Table,
-        ...topHeroesByPower
-    }, {
-        component: Table,
-        ...topHeaviestHeroes
-    }, {
-        component: Table,
-        ...topHeroesByHeight
-    }]);
+    const heroesByRace = {
+        component: Section,
+        name: 'heroesByRace',
+        displayName: 'Heroes By Race',
+        templates: [{
+            component: PDFChart,
+            chartData: chartData.raceBarChart(),
+            width: 600,
+            height: 200
+        }]
+    }
+
+    const powerfulHeroes = {
+        component: Section,
+        newPage: true,
+        name: 'powerfulHeroes',
+        displayName: 'Powerful Heroes',
+        templates: [{
+            component: Table,
+            ...topHeroesByPower
+        }]
+    }
+
+    const heaviestHeroesSection = {
+        component: Section,
+        newPage: true,
+        name: 'heaviestHeroes',
+        displayName: 'Heaviest Heroes',
+        templates: [{
+            component: Table,
+            ...topHeaviestHeroes
+        }]
+    }
+
+    const tallestHeroes = {
+        component: Section,
+        name: 'tallestHeroes',
+        displayName: 'Tallest Heroes',
+        templates: [{
+            component: Table,
+            ...topHeroesByHeight
+        }]
+    }
+
+    const TableOfContents = {
+        component: TOC,
+    }
+
+    instance.render([
+        heroesByGender,
+        heroesByRace,
+        powerfulHeroes,
+        heaviestHeroesSection,
+        tallestHeroes, TableOfContents]);
 
 }
 
@@ -98,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("https://cdn.jsdelivr.net/gh/akabab/superhero-api@0.3.0/api/all.json")
         .then(res => res.json())
         .then(heroes => {
-            render(PDF(heroes), document.getElementById("root"));
+            PDF(heroes);
         })
 });
 

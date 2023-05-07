@@ -41,6 +41,7 @@ function create(config) {
         createSection,
         events: assignDefaultEvents(events),
         render,
+        pagesDiv
     }
 
     /**
