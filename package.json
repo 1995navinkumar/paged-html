@@ -4,7 +4,7 @@
     "description": "A library to render paged HTML which is print ready to any paper format",
     "main": "index.js",
     "scripts": {
-        "watch": "cross-env NODE_ENV=development esbuild demo/public/index.js --bundle --minify=true --watch --format=esm --outfile=demo/dist/paged-html.js --servedir=demo",
+        "start": "cross-env NODE_ENV=development esbuild demo/public/index.js --bundle --watch --format=esm --outfile=demo/dist/paged-html.js --servedir=demo",
         "build": "esbuild src/index.js --bundle --format=esm --minify --sourcemap=external --outfile=index.js"
     },
     "repository": {

@@ -39,7 +39,8 @@ function create(config) {
         getCurrentPage,
         getRemainingHeight,
         createSection,
-        events: assignDefaultEvents(events)
+        events: assignDefaultEvents(events),
+        render,
     }
 
     /**
@@ -113,42 +114,43 @@ function create(config) {
     setPageOptions(root, pageConfig);
     insertNewPage();
 
+    /**
+     * @param { Array<TemplateConfig> } templates 
+     * @param { object } userProps 
+     */
+    function render(templates, userProps = {}) {
+        templates.forEach(template => {
+            const { component, ...rest } = template;
+
+            const { getCurrentPage } = instance;
+
+            const { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
+
+            init();
+
+            for (const el of renderer()) {
+                var currentPage = getCurrentPage();
+                var contentArea = currentPage.contentArea;
+                if (contentArea.scrollHeight > contentArea.clientHeight) {
+                    onOverflow(el);
+                }
+            }
+
+            onEnd();
+
+        });
+        triggerPageEndEvent();
+    }
+
+
+
     return instance;
 
 }
 
-/**
- * 
- * @param { PagedHTMLInstance } instance 
- * @param { Array<TemplateConfig> } templates 
- * @param { object } userProps 
- */
-function render(instance, templates, userProps = {}) {
-    templates.forEach(template => {
-        const { component, ...rest } = template;
-
-        const { getCurrentPage } = instance;
-
-        const { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
-
-        init();
-
-        for (const el of renderer()) {
-            var currentPage = getCurrentPage();
-            var contentArea = currentPage.contentArea;
-            if (contentArea.scrollHeight > contentArea.clientHeight) {
-                onOverflow(el);
-            }
-        }
-
-        onEnd();
-
-    });
-}
 
 const PagedHTML = {
-    create,
-    render
+    create
 }
 
 export default PagedHTML;

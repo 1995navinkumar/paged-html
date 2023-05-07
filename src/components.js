@@ -117,9 +117,12 @@ export function Table(instance, data) {
 
     var { columns, rows } = data;
 
-    var pageContent = instance.getCurrentPage().contentArea;
 
     function init() {
+        if (instance.getRemainingHeight() < 300) {
+            instance.insertNewPage();
+        }
+        var pageContent = instance.getCurrentPage().contentArea;
         renderHeader();
         table.appendChild(tbody);
         pageContent.appendChild(table);
@@ -127,23 +130,26 @@ export function Table(instance, data) {
 
     function renderHeader() {
         var thead = htmlToElement(`<thead></thead>`);
-        var titleTr = htmlToElement(`<tr><th colspan=${columns + 1}>Test Table</th></tr>`);
 
         var headTr = htmlToElement(`<tr></tr>`);
-        for (var col = 0; col <= columns; col++) {
-            var th = htmlToElement(`<th> col ${col}</th>`);
+
+        columns.forEach(column => {
+            const content = column.header(column);
+            const th = htmlToElement(`<th>${content}</th>`);
             headTr.appendChild(th);
-        }
-        thead.appendChild(titleTr);
+        });
+
         thead.appendChild(headTr);
         table.appendChild(thead);
     }
 
     function* renderer() {
-        for (var i = 0; i <= rows; i++) {
+        for (var i = 0; i < rows.length; i++) {
+            const row = rows[i];
             var tr = htmlToElement(`<tr></tr>`);
-            for (var j = 0; j <= columns; j++) {
-                var td = htmlToElement(`<td> row ${i} col ${j}</td>`);
+            for (var j = 0; j < columns.length; j++) {
+                const cellContent = columns[j].cell(columns[j], row, j);
+                var td = htmlToElement(`<td>${cellContent}</td>`);
                 tr.appendChild(td);
             }
             tbody.appendChild(tr);

@@ -2,7 +2,14 @@ import { heightLens, nameLens, totalPower, powerLens, weightLens, imageLens } fr
 
 export function top10HeroesByPower(queries) {
     let top10Heroes = queries.getTop10HeroesByPower();
-    let columns = [{ label: '', accessor: imageLens }, { label: "Name", accessor: nameLens }, { label: "Power", accessor: h => totalPower(powerLens(h)) }];
+    let columns = [{
+        name: 'avatar', header: (column) => ``, cell: (column, row) => `<img src=${imageLens(row)} />`,
+    }, {
+        name: "Name", header: () => 'Name', cell: (column, row, index) => `${nameLens(row)}`,
+    }, {
+        name: "Power", header: () => 'Power', cell: (column, row) => totalPower(powerLens(row)),
+    }];
+
     return {
         columns,
         rows: top10Heroes
@@ -12,11 +19,9 @@ export function top10HeroesByPower(queries) {
 export function heaviestHeroes(queries) {
     let heroes = queries.getHeaviestHeroes();
     let columns = [{
-        label: "Name",
-        accessor: nameLens
+        name: "Name", header: () => 'Name', cell: (column, row, index) => `${nameLens(row)}`,
     }, {
-        label: "Weight",
-        accessor: weightLens
+        name: "Weight", header: () => 'Weight', cell: (column, row, index) => `${weightLens(row)}`,
     }]
     return {
         columns,
@@ -27,11 +32,9 @@ export function heaviestHeroes(queries) {
 export function top10TallestHeroes(queries) {
     let heroes = queries.getTop10TallestHeroes();
     let columns = [{
-        label: "Name",
-        accessor: nameLens
+        name: "Name", header: () => 'Name', cell: (column, row, index) => `${nameLens(row)}`,
     }, {
-        label: "Height",
-        accessor: heightLens
+        name: "Height", header: () => 'Height', cell: (column, row, index) => `${heightLens(row)}`,
     }]
     return {
         columns,
