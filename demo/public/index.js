@@ -54,14 +54,17 @@ function PDFChart(pagedInstance, { chartData, height = 500, width = 500 }) {
 
 function PDF(heroes) {
     let queries = HeroQueries(heroes);
-    window.queries = queries;
     let chartData = HeroChart(queries);
     let topHeroesByPower = top10HeroesByPower(queries);
     let topHeroesByHeight = top10TallestHeroes(queries);
     let topHeaviestHeroes = heaviestHeroes(queries);
 
+    const root = document.getElementById('root');
+
+    if (!root) return;
+
     const instance = PagedHTML.create({
-        root: document.getElementById('root'),
+        root,
         events: {
             onPageEnd: (page, instance) => {
                 const topLeft = page.querySelector('.top-left');

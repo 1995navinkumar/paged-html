@@ -67,3 +67,22 @@ export type PagedComponent = {
     onOverflow?: (el: HTMLElement) => void;
     onEnd?: () => Promise<void> | void;
 }
+
+
+export type ParagraphProps = {
+    paraElement: HTMLElement
+}
+
+export type SectionProps = {
+    templates: Array<TemplateConfig>;
+    name: string;
+    displayName: string;
+    parentSection?: Section | PagedHTMLInstance,
+    newPage?: boolean;
+    threshold?: number;
+}
+
+export type TableProps = {
+    columns: Array<Record<string, any>>;
+    rows: Array<Record<string, any>>;
+}

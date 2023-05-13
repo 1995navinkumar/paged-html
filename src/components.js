@@ -9,12 +9,15 @@ import {
 /**
  * @typedef { import("./types").PagedHTMLInstance } PagedHTMLInstance
  * @typedef { import("./types").PagedComponent } PagedComponent
+ * @typedef { import("./types").ParagraphProps } ParagraphProps
+ * @typedef { import("./types").SectionProps } SectionProps
+ * @typedef { import("./types").TableProps } TableProps
+ * 
 */
 
 /**
- * 
  * @param {PagedHTMLInstance} instance 
- * @param { object } userProps 
+ * @param { ParagraphProps } userProps 
  * @returns { PagedComponent }
  */
 export function Paragraph(instance, { paraElement }) {
@@ -25,7 +28,7 @@ export function Paragraph(instance, { paraElement }) {
         }
     }
 
-    async function* renderer() {
+    function* renderer() {
         var pageContent = instance.getCurrentPage().contentArea;
         pageContent.appendChild(paraElement);
         yield paraElement;
@@ -65,13 +68,8 @@ export function Paragraph(instance, { paraElement }) {
             .appendChild(overflowRange.extractContents());
     }
 
-    async function onEnd() {
-
-    }
-
     return {
         init,
-        onEnd,
         renderer,
         onOverflow
     }
@@ -81,7 +79,7 @@ export function Paragraph(instance, { paraElement }) {
 /**
  * 
  * @param {PagedHTMLInstance} instance 
- * @param { object } userProps 
+ * @param { SectionProps } userProps 
  * @returns { PagedComponent }
  */
 export function Section(instance, { templates, name, displayName, parentSection, newPage, threshold = 0 }) {
@@ -112,19 +110,9 @@ export function Section(instance, { templates, name, displayName, parentSection,
 
     }
 
-    function onOverflow() {
-
-    }
-
-    function onEnd() {
-
-    }
-
     return {
         init,
-        onEnd,
-        renderer,
-        onOverflow
+        renderer
     }
 
 }
@@ -132,7 +120,7 @@ export function Section(instance, { templates, name, displayName, parentSection,
 /**
  * 
  * @param {PagedHTMLInstance} instance 
- * @param { object } userProps 
+ * @param { TableProps } userProps 
  * @returns { PagedComponent }
  */
 export function Table(instance, userProps) {
@@ -199,14 +187,10 @@ export function Table(instance, userProps) {
         tbody.appendChild(tr);
     }
 
-    function onEnd() {
-    }
-
     return {
         init,
         renderer,
-        onOverflow,
-        onEnd
+        onOverflow
     }
 }
 

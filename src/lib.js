@@ -1,5 +1,5 @@
 // @ts-check
-import { setPageOptions, assignDefaultEvents, TEMPLATE } from './utils.js';
+import { setPageOptions, assignDefaultEvents, TEMPLATE, noOp } from './utils.js';
 
 /**
  * @typedef { import("./types").PagedHTMLInstance } PagedHTMLInstance
@@ -125,7 +125,7 @@ function create(config) {
 
             const { getCurrentPage } = instance;
 
-            const { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
+            const { init = noOp, renderer, onOverflow = noOp, onEnd = noOp } = component(instance, { ...rest, ...userProps });
 
             await init();
 
