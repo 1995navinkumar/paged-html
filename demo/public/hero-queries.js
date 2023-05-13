@@ -57,7 +57,7 @@ export function HeroQueries(heroes) {
     function getTop10HeroesByPower() {
         return [...heroes]
             .sort((hero1, hero2) => totalPower(powerLens(hero2)) - totalPower(powerLens(hero1)))
-            .slice(0, 10)
+            .slice(0, 20)
     }
 
     function getTop10TallestHeroes() {

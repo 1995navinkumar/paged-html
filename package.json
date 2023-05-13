@@ -2,10 +2,11 @@
     "name": "paged-html",
     "version": "1.0.2",
     "description": "A library to render paged HTML which is print ready to any paper format",
-    "main": "index.js",
+    "main": "build/index.js",
     "scripts": {
-        "start": "cross-env NODE_ENV=development esbuild demo/public/index.js --bundle --watch --format=esm --outfile=demo/dist/paged-html.js --servedir=demo",
-        "build": "esbuild src/index.js --bundle --format=esm --minify --sourcemap=external --outfile=index.js"
+        "start": "cross-env NODE_ENV=development esbuild demo/public/index.js --bundle --watch --format=esm --sourcemap=external --outfile=demo/dist/paged-html.js --servedir=demo",
+        "types": "npx tsc",
+        "build": "npm run types && cross-env NODE_ENV=production esbuild src/index.js --bundle --format=esm --minify --sourcemap=external --outfile=build/index.js"
     },
     "repository": {
         "type": "git",

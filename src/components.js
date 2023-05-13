@@ -1,3 +1,4 @@
+// @ts-check
 import {
     findOverflowingNode,
     normalizeHTML,
@@ -5,6 +6,17 @@ import {
     htmlToElement
 } from "./utils.js";
 
+/**
+ * @typedef { import("./types").PagedHTMLInstance } PagedHTMLInstance
+ * @typedef { import("./types").PagedComponent } PagedComponent
+*/
+
+/**
+ * 
+ * @param {PagedHTMLInstance} instance 
+ * @param { object } userProps 
+ * @returns { PagedComponent }
+ */
 export function Paragraph(instance, { paraElement }) {
     function init() {
         var remHeight = instance.getRemainingHeight();
@@ -13,7 +25,7 @@ export function Paragraph(instance, { paraElement }) {
         }
     }
 
-    function* renderer() {
+    async function* renderer() {
         var pageContent = instance.getCurrentPage().contentArea;
         pageContent.appendChild(paraElement);
         yield paraElement;
@@ -53,7 +65,7 @@ export function Paragraph(instance, { paraElement }) {
             .appendChild(overflowRange.extractContents());
     }
 
-    function onEnd() {
+    async function onEnd() {
 
     }
 
@@ -66,11 +78,17 @@ export function Paragraph(instance, { paraElement }) {
 
 }
 
+/**
+ * 
+ * @param {PagedHTMLInstance} instance 
+ * @param { object } userProps 
+ * @returns { PagedComponent }
+ */
 export function Section(instance, { templates, name, displayName, parentSection, newPage, threshold = 0 }) {
 
     parentSection = parentSection || instance;
 
-    function init() {
+    async function init() {
         // chapter must begin in a new page
         if (!instance.getCurrentPage().isNew()) {
             if (newPage || instance.getRemainingHeight() < threshold) {
@@ -79,7 +97,7 @@ export function Section(instance, { templates, name, displayName, parentSection,
         }
 
         var section = createAnchor();
-        instance.render(templates, { parentSection: section });
+        await instance.render(templates, { parentSection: section });
     }
 
     function createAnchor() {
@@ -90,7 +108,7 @@ export function Section(instance, { templates, name, displayName, parentSection,
         return section;
     }
 
-    function* renderer() {
+    async function* renderer() {
 
     }
 
@@ -111,11 +129,17 @@ export function Section(instance, { templates, name, displayName, parentSection,
 
 }
 
-export function Table(instance, data) {
+/**
+ * 
+ * @param {PagedHTMLInstance} instance 
+ * @param { object } userProps 
+ * @returns { PagedComponent }
+ */
+export function Table(instance, userProps) {
     var table = htmlToElement(`<table></table>`);
     var tbody = htmlToElement(`<tbody></tbody>`);
 
-    var { columns, rows } = data;
+    var { columns, rows } = userProps;
 
 
     function init() {
@@ -143,9 +167,10 @@ export function Table(instance, data) {
         table.appendChild(thead);
     }
 
-    function* renderer() {
+    async function* renderer() {
         for (var i = 0; i < rows.length; i++) {
             const row = rows[i];
+            /** @type {HTMLElement} */
             var tr = htmlToElement(`<tr></tr>`);
             for (var j = 0; j < columns.length; j++) {
                 const cellContent = columns[j].cell(columns[j], row, j);
@@ -185,8 +210,12 @@ export function Table(instance, data) {
     }
 }
 
-
-export function TOC(instance, { sections = instance.sections }) {
+/**
+ * 
+ * @param {PagedHTMLInstance} instance
+ * @returns { PagedComponent }
+ */
+export function TOC(instance) {
 
     var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
 
@@ -199,7 +228,7 @@ export function TOC(instance, { sections = instance.sections }) {
         tocPages.push(instance.getCurrentPage());
     }
 
-    function* renderer() {
+    async function* renderer(sections = instance.sections) {
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
             var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">

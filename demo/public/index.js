@@ -2,8 +2,9 @@
 import { HeroQueries } from './hero-queries.js';
 import { HeroChart } from './chart-data.js';
 import { heaviestHeroes, top10HeroesByPower, top10TallestHeroes } from './table-data.js';
-import PagedHTML, { utils } from '../../src/index.js';
-import { Section, Table, TOC } from '../../src/components.js';
+import PagedHTML, { utils, components } from '../../build/index.js';
+
+const { Section, TOC, Table } = components;
 
 Chart.register(ChartDataLabels);
 
@@ -20,7 +21,7 @@ function PDFChart(pagedInstance, { chartData, height = 500, width = 500 }) {
         }
     }
 
-    function* renderer() {
+    async function* renderer() {
         var chartEl = utils.htmlToElement(`
             <div style="width:${width}px; height:${height}px;">
                 <canvas></canvas>
@@ -91,10 +92,15 @@ function PDF(heroes) {
         name: 'heroesByRace',
         displayName: 'Heroes By Race',
         templates: [{
-            component: PDFChart,
-            chartData: chartData.raceBarChart(),
-            width: 600,
-            height: 200
+            component: Section,
+            name: 'heroesByRaceSection1',
+            displayName: 'Heroes By Race Section 1',
+            templates: [{
+                component: PDFChart,
+                chartData: chartData.raceBarChart(),
+                width: 600,
+                height: 200
+            }]
         }]
     }
 

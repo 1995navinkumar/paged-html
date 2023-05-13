@@ -4,5 +4,4 @@ dist
 .history
 .vscode
 demo/public/bundle.js
-index.js
-index.js.map
+build

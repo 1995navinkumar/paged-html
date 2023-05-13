@@ -102,6 +102,11 @@ export function findOverflowingNode(el, parent) {
     return findOverFlowNode(el);
 }
 
+/**
+ * 
+ * @param {string} html 
+ * @returns {HTMLElement}
+ */
 export function htmlToElement(html) {
     var template = document.createElement('template');
     html = normalizeHTML(html);

@@ -119,17 +119,17 @@ function create(config) {
      * @param { Array<TemplateConfig> } templates 
      * @param { object } userProps 
      */
-    function render(templates, userProps = {}) {
-        templates.forEach(template => {
+    async function render(templates, userProps = {}) {
+        for (const template of templates) {
             const { component, ...rest } = template;
 
             const { getCurrentPage } = instance;
 
             const { init, renderer, onOverflow, onEnd } = component(instance, { ...rest, ...userProps });
 
-            init();
+            await init();
 
-            for (const el of renderer()) {
+            for await (const el of renderer()) {
                 var currentPage = getCurrentPage();
                 var contentArea = currentPage.contentArea;
                 if (contentArea.scrollHeight > contentArea.clientHeight) {
@@ -137,9 +137,8 @@ function create(config) {
                 }
             }
 
-            onEnd();
-
-        });
+            await onEnd();
+        }
         triggerPageEndEvent();
     }
 
