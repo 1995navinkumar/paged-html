@@ -35,7 +35,7 @@ export type PagedHTMLInstance = {
     getRemainingHeight: () => number;
     createSection: (name: string, userProps?: Record<string, any>) => Section;
     events: PagedEvents;
-    render: (templates: Array<TemplateConfig>, userProps?: Record<string, any>) => void;
+    render: (components: Array<TemplateConfig>, userProps?: Record<string, any>) => void;
     pagesDiv: HTMLElement;
 }
 
@@ -57,15 +57,15 @@ export interface PagedHTMLElement extends HTMLElement {
 }
 
 export type TemplateConfig = {
-    component: (instance: PagedHTMLInstance, props?: Record<string, any>) => PagedComponent;
+    // component: (instance: PagedHTMLInstance, props?: Record<string, any>) => PagedComponent;
     [key: string]: any;
 }
 
 export type PagedComponent = {
-    init?: () => Promise<void> | void;
-    renderer: (userProps?: Record<string, any>) => AsyncIterableIterator<HTMLElement> | IterableIterator<HTMLElement>;
-    onOverflow?: (el: HTMLElement) => void;
-    onEnd?: () => Promise<void> | void;
+    init?: (instance: PagedHTMLInstance) => Promise<void> | void;
+    renderer: (instance: PagedHTMLInstance, userProps?: Record<string, any>) => AsyncIterableIterator<HTMLElement> | IterableIterator<HTMLElement>;
+    onOverflow?: (instance: PagedHTMLInstance, el: HTMLElement) => void;
+    onEnd?: (instance: PagedHTMLInstance) => Promise<void> | void;
 }
 
 

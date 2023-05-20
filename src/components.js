@@ -16,25 +16,25 @@ import {
 */
 
 /**
- * @param {PagedHTMLInstance} instance 
  * @param { ParagraphProps } userProps 
  * @returns { PagedComponent }
  */
-export function Paragraph(instance, { paraElement }) {
-    function init() {
+
+export function Paragraph({ paraElement }) {
+    function init(instance) {
         var remHeight = instance.getRemainingHeight();
         if (remHeight < 180) {
             instance.insertNewPage();
         }
     }
 
-    function* renderer() {
+    function* renderer(instance) {
         var pageContent = instance.getCurrentPage().contentArea;
         pageContent.appendChild(paraElement);
         yield paraElement;
     }
 
-    function onOverflow(overflowParagraph) {
+    function onOverflow(instance, overflowParagraph) {
         var pageContent = instance.getCurrentPage().contentArea;
         var overFlowingNode = findOverflowingNode(overflowParagraph, pageContent);
         var pageBottom = nodeBottom(pageContent);
@@ -76,29 +76,26 @@ export function Paragraph(instance, { paraElement }) {
 
 }
 
+
 /**
- * 
- * @param {PagedHTMLInstance} instance 
  * @param { SectionProps } userProps 
  * @returns { PagedComponent }
  */
-export function Section(instance, { templates, name, displayName, parentSection, newPage, threshold = 0 }) {
+export function Section({ templates, name, displayName, newPage, threshold = 0 }) {
 
-    parentSection = parentSection || instance;
-
-    async function init() {
+    async function init(instance, userProps) {
         // chapter must begin in a new page
         if (!instance.getCurrentPage().isNew()) {
             if (newPage || instance.getRemainingHeight() < threshold) {
                 instance.insertNewPage()
             }
         }
-
-        var section = createAnchor();
+        var section = createAnchor(instance, userProps);
         await instance.render(templates, { parentSection: section });
     }
 
-    function createAnchor() {
+    function createAnchor(instance, { parentSection }) {
+        parentSection = parentSection || instance;
         var section = parentSection.createSection(name, { displayName });
 
         var anchor = htmlToElement(`<div depth="${section.depth}" class="section"><span id="${name}">${displayName || name}</span></div>`);
@@ -118,19 +115,18 @@ export function Section(instance, { templates, name, displayName, parentSection,
 }
 
 /**
- * 
- * @param {PagedHTMLInstance} instance 
- * @param { TableProps } userProps 
+ * @param { TableProps } userProps
  * @returns { PagedComponent }
  */
-export function Table(instance, userProps) {
+
+export function Table(userProps) {
     var table = htmlToElement(`<table></table>`);
     var tbody = htmlToElement(`<tbody></tbody>`);
 
     var { columns, rows } = userProps;
 
 
-    function init() {
+    function init(instance) {
         if (instance.getRemainingHeight() < 300) {
             instance.insertNewPage();
         }
@@ -170,7 +166,7 @@ export function Table(instance, userProps) {
         }
     }
 
-    function onOverflow(overflowRow) {
+    function onOverflow(instance, overflowRow) {
         var page = instance.insertNewPage();
         table = htmlToElement(`<table></table>`);
         tbody = htmlToElement(`<tbody></tbody>`);
@@ -195,24 +191,22 @@ export function Table(instance, userProps) {
 }
 
 /**
- * 
- * @param {PagedHTMLInstance} instance
  * @returns { PagedComponent }
  */
-export function TOC(instance) {
+export function TOC() {
 
     var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
 
     var tocPages = [];
 
-    function init() {
+    function init(instance) {
         // assign null objects to pageEnd and pageStart events
         !instance.getCurrentPage().isNew() && instance.insertNewPage();
         instance.getCurrentPage().contentArea.appendChild(tocElement);
         tocPages.push(instance.getCurrentPage());
     }
 
-    async function* renderer(sections = instance.sections) {
+    async function* renderer(instance, userProps, sections = instance.sections) {
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
             var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">
@@ -223,12 +217,12 @@ export function TOC(instance) {
             tocElement.appendChild(secHTML);
             yield secHTML;
             if (section.sections.length > 0) {
-                yield* renderer(section.sections);
+                yield* renderer(instance, {}, section.sections);
             }
         }
     }
 
-    function onOverflow(overFlowEl) {
+    function onOverflow(instance, overFlowEl) {
         instance.insertNewPage();
         tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
         instance.getCurrentPage().contentArea.appendChild(tocElement);
@@ -236,7 +230,7 @@ export function TOC(instance) {
         tocPages.push(instance.getCurrentPage());
     }
 
-    function onEnd() {
+    function onEnd(instance) {
         instance.pagesDiv.prepend(...tocPages);
     }
 

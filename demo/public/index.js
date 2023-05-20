@@ -13,15 +13,15 @@ Chart.defaults.set('plugins.datalabels', {
 });
 
 
-function PDFChart(pagedInstance, { chartData, height = 500, width = 500 }) {
-    function init() {
+function PDFChart({ chartData, height = 500, width = 500 }) {
+    function init(pagedInstance) {
         var remainingHeight = pagedInstance.getRemainingHeight();
         if (remainingHeight < height) {
             pagedInstance.insertNewPage();
         }
     }
 
-    async function* renderer() {
+    async function* renderer(pagedInstance) {
         var chartEl = utils.htmlToElement(`
             <div style="width:${width}px; height:${height}px;">
                 <canvas></canvas>
@@ -80,75 +80,49 @@ function PDF(heroes) {
         },
     });
 
-    const heroesByGender = {
-        component: Section,
+    const heroesByGender = Section({
         name: 'heroesByGender',
-        displayName: 'Heroes By  Gender',
-        templates: [{
-            component: PDFChart,
-            chartData: chartData.genderPieChart()
-        }]
-    }
+        displayName: 'Heroes By Gender',
+        templates: [PDFChart({ chartData: chartData.genderPieChart() })]
+    })
 
-    const heroesByRace = {
-        component: Section,
+    const heroesByRace = Section({
         name: 'heroesByRace',
         displayName: 'Heroes By Race',
-        templates: [{
-            component: Section,
+        newPage: true,
+        templates: [Section({
             name: 'heroesByRaceSection1',
             displayName: 'Heroes By Race Section 1',
-            templates: [{
-                component: PDFChart,
-                chartData: chartData.raceBarChart(),
-                width: 600,
+            templates: [PDFChart({
+                chartData: chartData.raceBarChart(), width: 600,
                 height: 200
-            }]
-        }]
-    }
+            })]
+        })]
+    })
 
-    const powerfulHeroes = {
-        component: Section,
+    const powerfulHeroes = Section({
         newPage: true,
         name: 'powerfulHeroes',
         displayName: 'Powerful Heroes',
-        templates: [{
-            component: Table,
-            ...topHeroesByPower
-        }]
-    }
+        templates: [Table({ ...topHeroesByPower })]
+    })
 
-    const heaviestHeroesSection = {
-        component: Section,
+    const heaviestHeroesSection = Section({
         newPage: true,
         name: 'heaviestHeroes',
         displayName: 'Heaviest Heroes',
-        templates: [{
-            component: Table,
-            ...topHeaviestHeroes
-        }]
-    }
+        templates: [Table({ ...topHeaviestHeroes })]
+    })
 
-    const tallestHeroes = {
-        component: Section,
+    const tallestHeroes = Section({
         name: 'tallestHeroes',
         displayName: 'Tallest Heroes',
-        templates: [{
-            component: Table,
-            ...topHeroesByHeight
-        }]
-    }
+        templates: [Table({ ...topHeroesByHeight })]
+    })
 
-    const TableOfContents = {
-        component: TOC,
-    }
+    const TableOfContents = TOC();
 
-    instance.render([
-        heroesByGender,
-        heroesByRace,
-        powerfulHeroes,
-        heaviestHeroesSection,
-        tallestHeroes, TableOfContents]);
+    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, TableOfContents]);
 
 }
 

@@ -116,28 +116,27 @@ function create(config) {
     insertNewPage();
 
     /**
-     * @param { Array<TemplateConfig> } templates 
+     * @param { Array<TemplateConfig> } components
      * @param { object } userProps 
      */
-    async function render(templates, userProps = {}) {
-        for (const template of templates) {
-            const { component, ...rest } = template;
+    async function render(components = [], userProps = {}) {
+        for (const component of components) {
 
             const { getCurrentPage } = instance;
 
-            const { init = noOp, renderer, onOverflow = noOp, onEnd = noOp } = component(instance, { ...rest, ...userProps });
+            const { init = noOp, renderer, onOverflow = noOp, onEnd = noOp } = component;
 
-            await init();
+            await init(instance, userProps);
 
-            for await (const el of renderer()) {
+            for await (const el of renderer(instance, userProps)) {
                 var currentPage = getCurrentPage();
                 var contentArea = currentPage.contentArea;
                 if (contentArea.scrollHeight > contentArea.clientHeight) {
-                    onOverflow(el);
+                    onOverflow(instance, el);
                 }
             }
 
-            await onEnd();
+            await onEnd(instance, userProps);
         }
         triggerPageEndEvent();
     }
