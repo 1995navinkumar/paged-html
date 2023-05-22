@@ -14,9 +14,9 @@ export type Margin = {
 }
 
 export type PageConfig = {
-    format: PAGE_SIZE;
-    landscape: boolean;
-    margin: Margin;
+    format?: PAGE_SIZE;
+    landscape?: boolean;
+    margin?: Margin;
 }
 
 export type PagedEvents = {

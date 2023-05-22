@@ -54,6 +54,8 @@ function PDFChart({ chartData, height = 500, width = 500 }) {
 
 function PDF(heroes) {
     let queries = HeroQueries(heroes);
+    // @ts-ignore
+    window.queries = queries
     let chartData = HeroChart(queries);
     let topHeroesByPower = top10HeroesByPower(queries);
     let topHeroesByHeight = top10TallestHeroes(queries);

@@ -79,12 +79,19 @@ export function HeroQueries(heroes) {
             .filter(hero => hero[1].length >= minimumCount)
     }
 
+    function getHeroesOftheMonth(count = 10) {
+        return (Array.from({ length: count }).fill(0))
+            .map(_ => Math.round(Math.random() * heroes.length))
+            .map(idx => heroes[idx])
+    }
+
     return {
         getTotalHeroesCount,
         getHeroesCountByGender,
         getTop10HeroesByPower,
         getTop10TallestHeroes,
         getHeaviestHeroes,
-        getHeroesByRace
+        getHeroesByRace,
+        getHeroesOftheMonth
     }
 }
