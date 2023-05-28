@@ -8,8 +8,9 @@
     <title>Paged HTML</title>
     <style>
         a {
-            all : unset;
+            all: unset;
         }
+
         table {
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
@@ -106,6 +107,36 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <div id="root">
     </div>
+
+    <style>
+        .card-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-container:not(:first-child) {
+            margin-top: 12px;
+        }
+
+        .card {
+            width: 252px;
+            border: 1px solid #dedede;
+        }
+
+        .card__avatar img {
+            width: 100%;
+            height: 264px;
+            object-fit: fill;
+        }
+
+        .card__details {
+            display: flex;
+            flex-direction: column;
+            row-gap: 4px;
+            padding: 12px;
+        }
+    </style>
+
     <script type="module" src="./dist/paged-html.js"></script>
 
 </body>

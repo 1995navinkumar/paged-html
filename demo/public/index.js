@@ -2,7 +2,8 @@
 import { HeroQueries } from './hero-queries.js';
 import { HeroChart } from './chart-data.js';
 import { heaviestHeroes, top10HeroesByPower, top10TallestHeroes } from './table-data.js';
-import PagedHTML, { utils, components } from '../../build/index.js';
+import PagedHTML, { components } from '../../build/index.js';
+import { Card, PDFChart } from './components.js';
 
 const { Section, TOC, Table } = components;
 
@@ -12,46 +13,6 @@ Chart.defaults.set('plugins.datalabels', {
     color: '#FFF'
 });
 
-
-function PDFChart({ chartData, height = 500, width = 500 }) {
-    function init(pagedInstance) {
-        var remainingHeight = pagedInstance.getRemainingHeight();
-        if (remainingHeight < height) {
-            pagedInstance.insertNewPage();
-        }
-    }
-
-    async function* renderer(pagedInstance) {
-        var chartEl = utils.htmlToElement(`
-            <div style="width:${width}px; height:${height}px;">
-                <canvas></canvas>
-            </div>
-        `);
-
-        var pageContent = pagedInstance.getCurrentPage().contentArea;
-        pageContent.appendChild(chartEl);
-
-        new Chart(chartEl.querySelector('canvas'), chartData);
-
-        yield chartEl;
-    }
-
-    function onOverflow(overflowedImageElement) {
-
-    }
-
-    function onEnd() {
-
-    }
-
-    return {
-        init,
-        renderer,
-        onOverflow,
-        onEnd
-    }
-}
-
 function PDF(heroes) {
     let queries = HeroQueries(heroes);
     // @ts-ignore
@@ -60,6 +21,7 @@ function PDF(heroes) {
     let topHeroesByPower = top10HeroesByPower(queries);
     let topHeroesByHeight = top10TallestHeroes(queries);
     let topHeaviestHeroes = heaviestHeroes(queries);
+    let heroesOfTheMonth = queries.getHeroesOftheMonth(10);
 
     const root = document.getElementById('root');
 
@@ -122,9 +84,16 @@ function PDF(heroes) {
         templates: [Table({ ...topHeroesByHeight })]
     })
 
+    const cardComponent = Section({
+        name: 'heroOfTheMonth',
+        displayName: 'Hero Of the Month',
+        newPage: true,
+        templates: [Card({ heroes: heroesOfTheMonth })]
+    })
+
     const TableOfContents = TOC();
 
-    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, TableOfContents]);
+    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, cardComponent, TableOfContents]);
 
 }
 

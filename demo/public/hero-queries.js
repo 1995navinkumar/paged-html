@@ -14,7 +14,7 @@ export const genderMap = {
 
 export const powerLens = hero => hero.powerstats;
 export const totalPower = p => p.intelligence + p.strength + p.speed + p.durability + p.power + p.combat;
-export const avgPower = p => totalPower(p) / 6;
+export const avgPower = p => Math.floor(totalPower(p) / 6);
 
 export const imageLens = hero => hero.images.md;
 
