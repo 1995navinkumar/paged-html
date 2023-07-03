@@ -14,7 +14,9 @@ export const genderMap = {
 
 export const powerLens = hero => hero.powerstats;
 export const totalPower = p => p.intelligence + p.strength + p.speed + p.durability + p.power + p.combat;
-export const avgPower = p => totalPower(p) / 6;
+export const avgPower = p => Math.floor(totalPower(p) / 6);
+
+export const imageLens = hero => hero.images.md;
 
 export const nameLens = hero => hero.name;
 export const heightLens = hero => hero.appearance.height[1]; // we omit inches and consider only cm/meters
@@ -55,7 +57,7 @@ export function HeroQueries(heroes) {
     function getTop10HeroesByPower() {
         return [...heroes]
             .sort((hero1, hero2) => totalPower(powerLens(hero2)) - totalPower(powerLens(hero1)))
-            .slice(0, 10)
+            .slice(0, 20)
     }
 
     function getTop10TallestHeroes() {
@@ -77,12 +79,19 @@ export function HeroQueries(heroes) {
             .filter(hero => hero[1].length >= minimumCount)
     }
 
+    function getHeroesOftheMonth(count = 10) {
+        return (Array.from({ length: count }).fill(0))
+            .map(_ => Math.round(Math.random() * heroes.length))
+            .map(idx => heroes[idx])
+    }
+
     return {
         getTotalHeroesCount,
         getHeroesCountByGender,
         getTop10HeroesByPower,
         getTop10TallestHeroes,
         getHeaviestHeroes,
-        getHeroesByRace
+        getHeroesByRace,
+        getHeroesOftheMonth
     }
 }

@@ -1,3 +1,4 @@
+// @ts-check
 import {
     findOverflowingNode,
     normalizeHTML,
@@ -5,182 +6,198 @@ import {
     htmlToElement
 } from "./utils.js";
 
-export function Paragraph(instance, { paraElement }) {
-    function init() {
-        var remHeight = instance.getRemainingHeight();
-        if (remHeight < 180) {
+/**
+ * @typedef { import("./types").PagedHTMLInstance } PagedHTMLInstance
+ * @typedef { import("./types").PagedComponent } PagedComponent
+ * @typedef { import("./types").ParagraphProps } ParagraphProps
+ * @typedef { import("./types").SectionProps } SectionProps
+ * @typedef { import("./types").TableProps } TableProps
+ * 
+*/
+
+/**
+ * @param { ParagraphProps } userProps 
+ * @returns { import("./types").PagedeComponentCreator }
+ */
+
+export function Paragraph({ paraElement }) {
+    return function (instance) {
+        function init() {
+            var remHeight = instance.getRemainingHeight();
+            if (remHeight < 180) {
+                instance.insertNewPage();
+            }
+        }
+
+        function* renderer() {
+            var pageContent = instance.getCurrentPage().contentArea;
+            pageContent.appendChild(paraElement);
+            yield paraElement;
+        }
+
+        function onOverflow(overflowParagraph) {
+            var pageContent = instance.getCurrentPage().contentArea;
+            var overFlowingNode = findOverflowingNode(overflowParagraph, pageContent);
+            var pageBottom = nodeBottom(pageContent);
+
+            var { textContent } = overFlowingNode;
+
+            var words = normalizeHTML(textContent).split(" ");
+            var lastIndex = 0;
+
+            var overflowWord = words.find(w => {
+                var startIndex = textContent.indexOf(w, lastIndex);
+
+                var textRange = document.createRange();
+                textRange.setStart(overFlowingNode, startIndex);
+                textRange.setEnd(overFlowingNode, startIndex + w.length);
+                var didOverflow = textRange.getBoundingClientRect().bottom > pageBottom;
+                lastIndex = startIndex + w.length;
+                return didOverflow;
+            });
+
+            var overflowIndex = lastIndex - overflowWord.length;
+
+            var overflowRange = document.createRange();
+            overflowRange.selectNode(overflowParagraph);
+            overflowRange.setStart(overFlowingNode, overflowIndex);
+
             instance.insertNewPage();
+
+            instance.getCurrentPage()
+                .contentArea
+                .appendChild(overflowRange.extractContents());
+        }
+
+        return {
+            init,
+            renderer,
+            onOverflow
         }
     }
-
-    function* renderer() {
-        var pageContent = instance.getCurrentPage().contentArea;
-        pageContent.appendChild(paraElement);
-        yield paraElement;
-    }
-
-    function onOverflow(overflowParagraph) {
-        var pageContent = instance.getCurrentPage().contentArea;
-        var overFlowingNode = findOverflowingNode(overflowParagraph, pageContent);
-        var pageBottom = nodeBottom(pageContent);
-
-        var { textContent } = overFlowingNode;
-
-        var words = normalizeHTML(textContent).split(" ");
-        var lastIndex = 0;
-
-        var overflowWord = words.find(w => {
-            var startIndex = textContent.indexOf(w, lastIndex);
-
-            var textRange = document.createRange();
-            textRange.setStart(overFlowingNode, startIndex);
-            textRange.setEnd(overFlowingNode, startIndex + w.length);
-            var didOverflow = textRange.getBoundingClientRect().bottom > pageBottom;
-            lastIndex = startIndex + w.length;
-            return didOverflow;
-        });
-
-        var overflowIndex = lastIndex - overflowWord.length;
-
-        var overflowRange = document.createRange();
-        overflowRange.selectNode(overflowParagraph);
-        overflowRange.setStart(overFlowingNode, overflowIndex);
-
-        instance.insertNewPage();
-
-        instance.getCurrentPage()
-            .contentArea
-            .appendChild(overflowRange.extractContents());
-    }
-
-    function onEnd() {
-
-    }
-
-    return {
-        init,
-        onEnd,
-        renderer,
-        onOverflow
-    }
-
 }
 
-export function Section(instance, { templates, name, displayName, parentSection, newPage, threshold = 0 }) {
 
-    parentSection = parentSection || instance;
+/**
+ * @param { SectionProps } sectionProps 
+ * @returns { import("./types").PagedeComponentCreator }
+ */
+export function Section({ templates, name, displayName, newPage, threshold = 0 }) {
+    return function (instance, userProps) {
+        async function init() {
+            // chapter must begin in a new page
+            if (!instance.getCurrentPage().isNew()) {
+                if (newPage || instance.getRemainingHeight() < threshold) {
+                    instance.insertNewPage()
+                }
+            }
+            var section = createAnchor(userProps);
+            await instance.render(templates, { parentSection: section });
+        }
 
-    function init() {
-        // chapter must begin in a new page
-        if (!instance.getCurrentPage().isNew()) {
-            if (newPage || instance.getRemainingHeight() < threshold) {
-                instance.insertNewPage()
+        function createAnchor({ parentSection = instance }) {
+            parentSection = parentSection || instance;
+            var section = parentSection.createSection(name, { displayName });
+
+            var anchor = htmlToElement(`<div depth="${section.depth}" class="section"><span id="${name}">${displayName || name}</span></div>`);
+            instance.getCurrentPage().contentArea.appendChild(anchor);
+            return section;
+        }
+
+        async function* renderer() {
+
+        }
+
+        return {
+            init,
+            renderer
+        }
+    }
+}
+
+/**
+ * @param { TableProps } userProps
+ * @returns { import("./types").PagedeComponentCreator }
+ */
+
+export function Table(userProps) {
+    return function (instance) {
+        var table = htmlToElement(`<table></table>`);
+        var tbody = htmlToElement(`<tbody></tbody>`);
+
+        var { columns, rows } = userProps;
+
+
+        function init() {
+            if (instance.getRemainingHeight() < 300) {
+                instance.insertNewPage();
+            }
+            var pageContent = instance.getCurrentPage().contentArea;
+            renderHeader();
+            table.appendChild(tbody);
+            pageContent.appendChild(table);
+        }
+
+        function renderHeader() {
+            var thead = htmlToElement(`<thead></thead>`);
+
+            var headTr = htmlToElement(`<tr></tr>`);
+
+            columns.forEach(column => {
+                const content = column.header(column);
+                const th = htmlToElement(`<th>${content}</th>`);
+                headTr.appendChild(th);
+            });
+
+            thead.appendChild(headTr);
+            table.appendChild(thead);
+        }
+
+        async function* renderer() {
+            for (var i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                /** @type {HTMLElement} */
+                var tr = htmlToElement(`<tr></tr>`);
+                for (var j = 0; j < columns.length; j++) {
+                    const cellContent = columns[j].cell(columns[j], row, j);
+                    var td = htmlToElement(`<td>${cellContent}</td>`);
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+                yield tr;
             }
         }
 
-        var section = createAnchor();
-        instance.TemplateRenderer(templates, { parentSection: section });
-    }
+        function onOverflow(overflowRow) {
+            var page = instance.insertNewPage();
+            table = htmlToElement(`<table></table>`);
+            tbody = htmlToElement(`<tbody></tbody>`);
 
-    function createAnchor() {
-        var section = parentSection.createSection(name, { displayName });
+            renderHeader();
 
-        var anchor = htmlToElement(`<div depth="${section.depth}" class="section"><span id="${name}">${displayName || name}</span></div>`);
-        instance.getCurrentPage().contentArea.appendChild(anchor);
-        return section;
-    }
+            table.appendChild(tbody);
 
-    function* renderer() {
+            var pageContent = page.contentArea;
 
-    }
+            pageContent.appendChild(table);
 
-    function onOverflow() {
-
-    }
-
-    function onEnd() {
-
-    }
-
-    return {
-        init,
-        onEnd,
-        renderer,
-        onOverflow
-    }
-
-}
-
-export function Table(instance, data) {
-    var table = htmlToElement(`<table></table>`);
-    var tbody = htmlToElement(`<tbody></tbody>`);
-
-    var { columns, rows } = data;
-
-    var pageContent = instance.getCurrentPage().contentArea;
-
-    function init() {
-        renderHeader();
-        table.appendChild(tbody);
-        pageContent.appendChild(table);
-    }
-
-    function renderHeader() {
-        var thead = htmlToElement(`<thead></thead>`);
-        var titleTr = htmlToElement(`<tr><th colspan=${columns + 1}>Test Table</th></tr>`);
-
-        var headTr = htmlToElement(`<tr></tr>`);
-        for (var col = 0; col <= columns; col++) {
-            var th = htmlToElement(`<th> col ${col}</th>`);
-            headTr.appendChild(th);
-        }
-        thead.appendChild(titleTr);
-        thead.appendChild(headTr);
-        table.appendChild(thead);
-    }
-
-    function* renderer() {
-        for (var i = 0; i <= rows; i++) {
-            var tr = htmlToElement(`<tr></tr>`);
-            for (var j = 0; j <= columns; j++) {
-                var td = htmlToElement(`<td> row ${i} col ${j}</td>`);
-                tr.appendChild(td);
-            }
+            var tr = overflowRow.parentElement.removeChild(overflowRow);
             tbody.appendChild(tr);
-            yield tr;
         }
-    }
 
-    function onOverflow(overflowRow) {
-        var page = instance.insertNewPage();
-        table = htmlToElement(`<table></table>`);
-        tbody = htmlToElement(`<tbody></tbody>`);
-
-        renderHeader();
-
-        table.appendChild(tbody);
-
-        var pageContent = page.contentArea;
-
-        pageContent.appendChild(table);
-
-        var tr = overflowRow.parentElement.removeChild(overflowRow);
-        tbody.appendChild(tr);
-    }
-
-    function onEnd() {
-    }
-
-    return {
-        init,
-        renderer,
-        onOverflow,
-        onEnd
+        return {
+            init,
+            renderer,
+            onOverflow
+        }
     }
 }
 
-
-export function TOC(instance, { sections = instance.sections }) {
+/**
+ * @param { PagedHTMLInstance } instance
+ * @returns { PagedComponent }
+ */
+export function TOC(instance) {
 
     var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
 
@@ -193,7 +210,7 @@ export function TOC(instance, { sections = instance.sections }) {
         tocPages.push(instance.getCurrentPage());
     }
 
-    function* renderer() {
+    async function* renderer(userProps, sections = instance.sections) {
         for (var i = 0; i < sections.length; i++) {
             var section = sections[i];
             var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">
@@ -204,7 +221,7 @@ export function TOC(instance, { sections = instance.sections }) {
             tocElement.appendChild(secHTML);
             yield secHTML;
             if (section.sections.length > 0) {
-                yield* renderer(section.sections);
+                yield* renderer({}, section.sections);
             }
         }
     }

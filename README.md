@@ -59,6 +59,10 @@ Yes, you can! Using PagedHTML.
   * Header 
   * Footer
 
+## Sample Output
+
+[Sample](./output/Paged%20HTML.pdf)
+
 
 ## Common Questions
 

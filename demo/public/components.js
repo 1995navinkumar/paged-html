@@ -1,71 +1,116 @@
-import { LitElement, html, ref, createRef, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/all/lit-all.min.js';
+import { utils } from "../../build";
+import { avgPower, heightInCm, heightLens, weightInKg, weightLens } from "./hero-queries";
 
-class RenderChart extends LitElement {
-    chartRef = createRef();
-    render() {
-        return html`<canvas ${ref(this.chartRef)} width=${this.width || 400} height=${this.height || 400}></canvas>`;
-    }
-    firstUpdated() {
-        let ctx = this.chartRef.value;
-        new Chart(ctx, this.chartdata);
-    }
-}
-customElements.define('sn-chart', RenderChart);
-
-
-class RenderTable extends LitElement {
-    static styles = css`
-        table {
-            font-family: Arial, Helvetica, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-        }
-        td,
-        th {
-            border: 1px solid #ddd;
-            padding: 8px;
+export function PDFChart({ chartData, height = 500, width = 500 }) {
+    return function (pagedInstance) {
+        function init() {
+            var remainingHeight = pagedInstance.getRemainingHeight();
+            if (remainingHeight < height) {
+                pagedInstance.insertNewPage();
+            }
         }
 
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+        async function* renderer() {
+            var chartEl = utils.htmlToElement(`
+                <div style="width:${width}px; height:${height}px;">
+                    <canvas></canvas>
+                </div>
+            `);
+
+            var pageContent = pagedInstance.getCurrentPage().contentArea;
+            pageContent.appendChild(chartEl);
+
+            new Chart(chartEl.querySelector('canvas'), chartData);
+
+            yield chartEl;
         }
 
-        tr:hover {
-            background-color: #ddd;
+        function onOverflow(overflowedImageElement) {
+
         }
 
-        th {
-            min-width : 150px;
-            padding-top: 12px;
-            padding-bottom: 12px;
-            text-align: left;
-            background-color: #04aa6d;
-            color: white;
+        function onEnd() {
+
         }
-    `
-    render() {
-        return html`
-                <table>
-                    <caption>${this.caption}</caption>
-                    <thead>
-                        <tr>
-                            ${
-                                this.columns.map(column => html`<th>${column.label}</th>`)
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${
-                            this.rows.map(row => html`
-                                    <tr>
-                                        ${this.columns.map(col => html`<td>${col.accessor(row)}</td>`)}
-                                    </tr>
-                                `)
-                        }
-                    </tbody>
-                </table>
-        `
+
+        return {
+            init,
+            renderer,
+            onOverflow,
+            onEnd
+        }
     }
 }
 
-customElements.define('sn-table', RenderTable);
+export function Card({ heroes }) {
+    return function (pagedInstance) {
+        const height = 579;
+        function init() {
+            var remainingHeight = pagedInstance.getRemainingHeight();
+            if (remainingHeight < height) {
+                pagedInstance.insertNewPage();
+            }
+        }
+
+        function getPairs(heroes) {
+            const pairs = [];
+            for (var cursor = 0; cursor < heroes.length; cursor += 2) {
+                const pair = heroes.slice(cursor, cursor + 2);
+                pairs.push(pair);
+            }
+            return pairs;
+        }
+
+        function renderCard(hero) {
+            const powerStat = avgPower(hero.powerstats);
+            const height = heightInCm(heightLens(hero));
+            const weight = weightInKg(weightLens(hero));
+            return `
+                <div class="card ${hero.name}">
+                    <div class="card__avatar">
+                        <img src=${hero.images.sm} />
+                    </div>
+                    <div class="card__details">
+                        <span>Name: ${hero.name} </span>
+                        <span>Gender: ${hero.appearance.gender}</span>
+                        <span>Alignment: ${hero.biography.alignment}</span>
+                        <span>Power Stat: ${powerStat}</span>
+                        <span>Height: ${height} </span>
+                        <span>Weight: ${weight}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function* renderer() {
+            const pairs = getPairs(heroes);
+            for (const heroPair of pairs) {
+                var cardEl = utils.htmlToElement(`
+                <div class="card-container">
+                    ${heroPair.map(renderCard).join("")}
+                </div>
+                `);
+                var pageContent = pagedInstance.getCurrentPage().contentArea;
+                pageContent.appendChild(cardEl);
+                yield cardEl;
+            }
+        }
+
+        function onOverflow(el) {
+            pagedInstance.insertNewPage();
+            pagedInstance.getCurrentPage().contentArea.appendChild(el);
+        }
+
+        function onEnd() {
+
+        }
+
+        return {
+            init,
+            renderer,
+            onOverflow,
+            onEnd
+        }
+
+    }
+}
