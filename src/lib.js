@@ -12,6 +12,7 @@ import { setPageOptions, assignDefaultEvents, TEMPLATE, noOp } from './utils.js'
  * @typedef { import("./types").PagedHTMLElement } PagedHTMLElement
  * @typedef { import("./types").TemplateConfig } TemplateConfig
  * @typedef { import("./types").PagedComponent } PagedComponent
+ * @typedef { import("./types").PagedeComponentCreator } PagedeComponentCreator
 */
 
 /**
@@ -116,7 +117,7 @@ function create(config) {
     insertNewPage();
 
     /**
-     * @param { Array<TemplateConfig> } components
+     * @param { Array<PagedeComponentCreator> } components
      * @param { object } userProps 
      */
     async function render(components = [], userProps = {}) {
@@ -124,19 +125,19 @@ function create(config) {
 
             const { getCurrentPage } = instance;
 
-            const { init = noOp, renderer, onOverflow = noOp, onEnd = noOp } = component;
+            const { init = noOp, renderer, onOverflow = noOp, onEnd = noOp } = component(instance, userProps);
 
-            await init(instance, userProps);
+            await init();
 
-            for await (const el of renderer(instance, userProps)) {
+            for await (const el of renderer(userProps)) {
                 var currentPage = getCurrentPage();
                 var contentArea = currentPage.contentArea;
                 if (contentArea.scrollHeight > contentArea.clientHeight) {
-                    onOverflow(instance, el);
+                    onOverflow(el);
                 }
             }
 
-            await onEnd(instance, userProps);
+            await onEnd();
         }
         triggerPageEndEvent();
     }

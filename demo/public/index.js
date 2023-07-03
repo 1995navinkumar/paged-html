@@ -41,7 +41,7 @@ function PDF(heroes) {
                 topLeft.innerHTML = `<img src='public/Marvel_Logo.svg' style='${style}'/>`;
             },
             onPageStart: () => { }
-        },
+        }
     });
 
     const heroesByGender = Section({
@@ -91,9 +91,7 @@ function PDF(heroes) {
         templates: [Card({ heroes: heroesOfTheMonth })]
     })
 
-    const TableOfContents = TOC();
-
-    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, cardComponent, TableOfContents]);
+    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, cardComponent, TOC]);
 
 }
 

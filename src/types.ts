@@ -62,16 +62,20 @@ export type TemplateConfig = {
 }
 
 export type PagedComponent = {
-    init?: (instance: PagedHTMLInstance) => Promise<void> | void;
-    renderer: (instance: PagedHTMLInstance, userProps?: Record<string, any>) => AsyncIterableIterator<HTMLElement> | IterableIterator<HTMLElement>;
-    onOverflow?: (instance: PagedHTMLInstance, el: HTMLElement) => void;
-    onEnd?: (instance: PagedHTMLInstance) => Promise<void> | void;
+    init?: () => Promise<void> | void;
+    renderer: (userProps?: Record<string, any>) => AsyncIterableIterator<HTMLElement> | IterableIterator<HTMLElement>;
+    onOverflow?: (el: HTMLElement) => void;
+    onEnd?: () => Promise<void> | void;
 }
+
+export type PagedeComponentCreator = (instance: PagedHTMLInstance, userProps?: Record<string, any>) => PagedComponent;
 
 
 export type ParagraphProps = {
     paraElement: HTMLElement
 }
+
+export type ParagraphComponent = (props: ParagraphProps) => PagedeComponentCreator;
 
 export type SectionProps = {
     templates: Array<TemplateConfig>;
