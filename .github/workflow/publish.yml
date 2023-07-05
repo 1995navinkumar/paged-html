@@ -1,0 +1,19 @@
+name: Publish on push
+
+on: workflow_dispatch
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  publish-package:
+    name: Publish Package to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - actions/checkout@v3
+      - actions/setup-node@v3
+
+      - name: Publish package
+        uses: JS-DevTools/npm-publish@v2
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
