@@ -35,7 +35,7 @@ export type PagedHTMLInstance = {
     getRemainingHeight: () => number;
     createSection: (name: string, userProps?: Record<string, any>) => Section;
     events: PagedEvents;
-    render: (components: Array<TemplateConfig>, userProps?: Record<string, any>) => void;
+    render: (components: Array<TemplateConfig>, userProps?: Record<string, any>) => Promise<void> | void;
     pagesDiv: HTMLElement;
 }
 
