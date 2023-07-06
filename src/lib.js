@@ -57,7 +57,7 @@ function create(config) {
 
     function triggerPageEndEvent() {
         if (pages[pages.length - 1]) {
-            events.onPageEnd(pages[pages.length - 1], instance);
+            instance.events.onPageEnd(pages[pages.length - 1], instance);
         }
     }
 
@@ -76,7 +76,7 @@ function create(config) {
 
         Object.assign(newPage, { contentArea, pageNumber, isNew });
 
-        events.onPageStart(newPage, instance);
+        instance.events.onPageStart(newPage, instance);
         return newPage;
     }
 

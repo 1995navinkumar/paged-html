@@ -2,8 +2,9 @@
 import { HeroQueries } from './hero-queries.js';
 import { HeroChart } from './chart-data.js';
 import { heaviestHeroes, top10HeroesByPower, top10TallestHeroes } from './table-data.js';
-import PagedHTML, { components } from '../../build/index.js';
+import PagedHTML, { components, utils } from '../../build/index.js';
 import { Card, PDFChart } from './components.js';
+import { styles } from './styles.js';
 
 const { Section, TOC, Table } = components;
 
@@ -13,7 +14,7 @@ Chart.defaults.set('plugins.datalabels', {
     color: '#FFF'
 });
 
-function PDF(heroes) {
+async function PDF(heroes) {
     let queries = HeroQueries(heroes);
     // @ts-ignore
     window.queries = queries
@@ -23,7 +24,15 @@ function PDF(heroes) {
     let topHeaviestHeroes = heaviestHeroes(queries);
     let heroesOfTheMonth = queries.getHeroesOftheMonth(10);
 
-    const root = document.getElementById('root');
+    const rootEl = document.getElementById('root');
+
+    const shadow = rootEl?.attachShadow({ mode: 'closed' });
+
+    shadow?.appendChild(utils.htmlToElement(`<div>
+        <style>${styles}</style>
+    </div>`));
+
+    const root = shadow?.firstElementChild;
 
     if (!root) return;
 
@@ -38,7 +47,7 @@ function PDF(heroes) {
                     top: 16px;
                     left: 16px;
                 `
-                topLeft.innerHTML = `<img src='public/Marvel_Logo.svg' style='${style}'/>`;
+                topLeft.innerHTML = `<span>${page.pageNumber}</span>`;
             },
             onPageStart: () => { }
         }
@@ -91,7 +100,23 @@ function PDF(heroes) {
         templates: [Card({ heroes: heroesOfTheMonth })]
     })
 
-    instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, cardComponent, TOC]);
+    await instance.render([heroesByGender, heroesByRace, powerfulHeroes, heaviestHeroesSection, tallestHeroes, cardComponent]);
+
+    instance.events = {
+        onPageEnd: (page, instance) => {
+            // const topLeft = page.querySelector('.top-left');
+            // const style = `
+            //     width: 100%;
+            //     position: relative;
+            //     top: 16px;
+            //     left: 16px;
+            // `
+            // topLeft.innerHTML = `<span>${page.pageNumber}</span>`;
+        },
+        onPageStart: () => { }
+    }
+
+    instance.render([TOC]);
 
 }
 
