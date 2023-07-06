@@ -116,7 +116,7 @@ async function PDF(heroes) {
         onPageStart: () => { }
     }
 
-    instance.render([TOC]);
+    instance.render([TOC()]);
 
 }
 

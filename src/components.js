@@ -3,7 +3,8 @@ import {
     findOverflowingNode,
     normalizeHTML,
     nodeBottom,
-    htmlToElement
+    htmlToElement,
+    insertAt
 } from "./utils.js";
 
 /**
@@ -12,6 +13,7 @@ import {
  * @typedef { import("./types").ParagraphProps } ParagraphProps
  * @typedef { import("./types").SectionProps } SectionProps
  * @typedef { import("./types").TableProps } TableProps
+ * @typedef { import("./types").TOCProps } TOCProps
  * 
 */
 
@@ -194,55 +196,58 @@ export function Table(userProps) {
 }
 
 /**
- * @param { PagedHTMLInstance } instance
- * @returns { PagedComponent }
+ * @param { TOCProps } userProps
+ * @returns { import("./types").PagedeComponentCreator }
  */
-export function TOC(instance) {
+export function TOC({ startFromPage = 1 } = {}) {
+    return function (instance) {
 
-    var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
+        var tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
 
-    var tocPages = [];
+        var tocPages = [];
 
-    function init() {
-        // assign null objects to pageEnd and pageStart events
-        !instance.getCurrentPage().isNew() && instance.insertNewPage();
-        instance.getCurrentPage().contentArea.appendChild(tocElement);
-        tocPages.push(instance.getCurrentPage());
-    }
+        function init() {
+            // assign null objects to pageEnd and pageStart events
+            !instance.getCurrentPage().isNew() && instance.insertNewPage();
+            instance.getCurrentPage().contentArea.appendChild(tocElement);
+            tocPages.push(instance.getCurrentPage());
+        }
 
-    async function* renderer(userProps, sections = instance.sections) {
-        for (var i = 0; i < sections.length; i++) {
-            var section = sections[i];
-            var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">
+        async function* renderer(userProps, sections = instance.sections) {
+            for (var i = 0; i < sections.length; i++) {
+                var section = sections[i];
+                var secHTML = htmlToElement(`<div style="padding-left : ${section.depth * 24}px" class="toc-section">
                 <a href="#${section.name}">${section.displayName}</a>
                 <span class="toc-dotted"></span>
                 <span class="toc-page-number">${section.page.pageNumber}</span>
                 </div>`);
-            tocElement.appendChild(secHTML);
-            yield secHTML;
-            if (section.sections.length > 0) {
-                yield* renderer({}, section.sections);
+                tocElement.appendChild(secHTML);
+                yield secHTML;
+                if (section.sections.length > 0) {
+                    yield* renderer({}, section.sections);
+                }
             }
         }
-    }
 
-    function onOverflow(overFlowEl) {
-        instance.insertNewPage();
-        tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
-        instance.getCurrentPage().contentArea.appendChild(tocElement);
-        tocElement.appendChild(overFlowEl);
-        tocPages.push(instance.getCurrentPage());
-    }
+        function onOverflow(overFlowEl) {
+            instance.insertNewPage();
+            tocElement = htmlToElement(`<div class="toc"><p class="toc-title">Table Of Contents</p></div>`);
+            instance.getCurrentPage().contentArea.appendChild(tocElement);
+            tocElement.appendChild(overFlowEl);
+            tocPages.push(instance.getCurrentPage());
+        }
 
-    function onEnd() {
-        instance.pagesDiv.prepend(...tocPages);
-    }
+        function onEnd() {
+            const parentNode = instance.pagesDiv;
+            insertAt(parentNode, startFromPage, ...tocPages);
+        }
 
-    return {
-        init,
-        onEnd,
-        renderer,
-        onOverflow
+        return {
+            init,
+            onEnd,
+            renderer,
+            onOverflow
+        }
     }
 
 }

@@ -102,6 +102,15 @@ export function findOverflowingNode(el, parent) {
     return findOverFlowNode(el);
 }
 
+export function insertAfter(referenceNode, newNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+export function insertAt(parentNode, index, ...newNodes) {
+    const referenceNode = parentNode.children[index - 1];
+    newNodes.forEach(node => parentNode.insertBefore(node, referenceNode));
+}
+
 /**
  * 
  * @param {string} html 

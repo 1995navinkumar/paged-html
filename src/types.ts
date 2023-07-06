@@ -90,3 +90,7 @@ export type TableProps = {
     columns: Array<Record<string, any>>;
     rows: Array<Record<string, any>>;
 }
+
+export type TOCProps = {
+    startFromPage?: number;
+}
